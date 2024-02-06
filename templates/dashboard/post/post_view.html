@@ -1,0 +1,119 @@
+{% extends 'dashboard/base/base.html' %}
+
+{% block title %} {{ post.title }} | Dashboard {% endblock %}
+
+{% block custom_css %}
+img {
+    width: 80%;
+    margin: 0 auto;
+    border-radius: 10px;
+}
+
+h5 {
+    padding-top: 30px;
+}
+
+h3 {
+    padding: 10px 0px;
+    color: black;
+}
+
+.text_div {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.text_div p {
+    padding: 5px;
+}
+
+{% endblock %}
+
+{% block body %}
+{% load static %}
+{% load humanize %}
+
+<div class="container-fluid">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-primary" {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <div class="col">
+            <div class="card shadow mb-4">
+                <div class="row" style="padding: 20px;">
+                    <div class="col-10 mx-auto">
+                        <h3>{{ post.title }}</h3>
+                        <div class="text_div">
+                            <p>Date: {{ post.created_at|date:"Y-m-d" }}</p>
+                            {% if post.status == 'active' %}
+                            <p>Status: <span style="color: green;"> {{ post.status }}</span> </p>
+                            {% else %}
+                            <p>Status: <span
+                                    style="color: red; background-color: rgb(70, 123, 172); padding: 5px; border-radius: 10px; ">{{ post.status }}</span>
+                            </p>
+                            {% endif %}
+                            {% if post.featured == True %}
+                            <p>Featured : <span style="color:green"> 人気物</span> </p>
+                            {% else %}
+                            <p>Featured : <span style="color:red"> 未人気</span></p>
+                            {% endif %}
+                        </div>
+                        {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="">
+                        {% else %}
+                        <img src="" alt="">
+                        {% endif %}
+                        <h5>{{ post.detail }}</h5>
+
+                        <hr>
+                        <hr>
+                        
+                        {% if user.is_authenticated %}
+                          {% if user.is_staff or user.is_superuser or user.author == post.author %}
+                              <!-- Add Edit and Delete buttons -->
+                              <a href="{% url 'edit_post' post.id %}" class="btn btn-warning btn-sm"><i class="far fa-edit"></i> 編集</a>
+                              <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete"><i class="far fa-trash-alt"></i> 削除 </a>
+                          {% endif %}
+                      {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Modal now -->
+<div class="modal fade" id="delete" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <h4> アイディアを削除しますか？</h4>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+        <form action="{% url 'delete_post' post.id %}" method="POST">
+            {% csrf_token %}
+          
+          <input type="submit" class="btn btn-danger" placeholder="Delete">
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

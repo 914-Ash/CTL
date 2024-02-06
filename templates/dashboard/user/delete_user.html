@@ -1,0 +1,47 @@
+{% extends 'dashboard/base/base.html' %}
+
+{% block title %} Delete USER | Dashboard {% endblock %}
+
+{% block custom_css %}
+    <!-- Add your custom CSS styles if needed -->
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="alert alert-primary" {% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col">
+                <div class="card shadow mb-4">
+                    <div class="row" style="padding: 20px;">
+                        <div class="col-10 mx-auto">
+                            <h3>Delete User</h3>
+                            <p>ユーザを本当に削除しますか？</p>
+
+                            <!-- Delete Button -->
+                            <form action="{% url 'delete_user' user.id %}" method="POST">
+                                {% csrf_token %}
+                                <input type="submit" class="btn btn-danger" value="Delete">
+                            </form>
+                            
+
+                            <!-- Cancel Button -->
+                            <a href="{% url 'all_user' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

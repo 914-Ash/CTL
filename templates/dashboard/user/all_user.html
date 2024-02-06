@@ -1,0 +1,60 @@
+<!-- dashboard/user/all_user.html -->
+
+{% extends 'dashboard/base/base.html' %}
+
+{% block title %} アイディア | ダッシュボード {% endblock %}
+{% block custom_css %}
+<!-- ここにカスタムCSSを追加 -->
+{% endblock %}
+
+{% block body %}
+{% load humanize %}
+<div class="container-fluid">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-primary" {% if message.tags %}class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="閉じる">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- DataTalesの例 -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th> No. </th>
+                            <th> ユーザID </th>
+                            <th> 削除 </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in all_users %}
+                            {% if not user.is_staff and not user.is_superuser %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><a href="{% url 'all_user' %}">{{ user.username }}</a></td>
+                                    <td>
+                                        <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm">削除</a>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル -->
+<!-- ここにモーダルのコンテンツを追加 -->
+
+{% endblock %}

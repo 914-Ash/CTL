@@ -1,0 +1,107 @@
+{% extends 'dashboard/base/base.html' %}
+
+{% block title %} {{ user.author.author.username }} | Profile {% endblock%}
+{% block custom_css %}
+.p_image {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+}
+.btn a {
+    color: white;
+}
+.main_wrapper {
+    height: 100vh;
+}
+
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: hidden;
+}
+table img {
+    width: 15%;
+    height: auto;
+}
+.section-heading {
+    font-size: 20px;
+    font-weight: bold;  /* Optional: Add bold styling if desired */
+    margin-bottom: 10px; /* Optional: Add margin for spacing */
+}
+{% endblock %}
+{% block body %}
+
+<div class="col">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-primary" {% if message.tags %}
+                        class="{{ message.tags }}"{% endif %}>{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+<div class="row main_wrapper">
+    <div class="col-6 col-md-4">
+        {% if user.author.author_image %}
+            <img class="p_image" src="{{ user.author.author_image.url }}" alt="">
+        {% else %}
+            <img class="p_image"
+                 src="https://genslerzudansdentistry.com/wp-content/uploads/2015/11/anonymous-user.png" alt="">
+        {% endif %}
+    </div>
+    <div class="col-12 col-md-8">
+        <button class="btn btn-dark float-right btn-sm"><a href="{% url 'edit' %}"> <i
+                        class="far fa-edit"></i> Edit profile </a></button>
+        <h3>@{{ user.author.author.username }}</h3>
+        <h5>{{ user.author.first_name }} {{ user.author.last_name }}</h5>
+        <h5>{{ user.author.email }}</h5>
+    </div>
+</div>
+
+<!-- Display User's Posts -->
+<div class="container-fluid mt-4">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-primary" {% if message.tags %}
+                        class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    <div class="section-heading">投稿したアイディアの一覧</div>
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                    <tr>
+                        <td> No. </td>
+                        <td> Date </td>
+                        <td> Title </td>
+                        <td> Status </td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for p in post %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td> {{ p.created_at|date:"Y-m-d" }}</td>
+                        <td><a href="{% url 'post' p.id %}">{{ p.title }}</a></td>
+                        <td> {{ p.status }} </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

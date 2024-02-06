@@ -1,0 +1,67 @@
+<!-- dashboard/blog_post_list.html -->
+
+{% extends 'dashboard/base/base.html' %}
+
+{% block title %} アイディア | ダッシュボード {% endblock %}
+{% block custom_css %}
+<!-- ここにカスタムCSSを追加 -->
+{% endblock %}
+
+{% block body %}
+{% load humanize %}
+<div class="container-fluid">
+    {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-primary" {% if message.tags %}class="{{ message.tags }}"{% endif %}>
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="閉じる">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    
+    <!-- DataTalesの例 -->
+    <div class="card shadow mb-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <td> No. </td>
+                            <td> 日付 </td>
+                            <td> タイトル </td>
+                            <td> ステータス </td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in all_posts %}
+                            <tr>
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ post.created_at|date:"Y-m-d" }}</td>
+                                <td><a href="{% url 'post' post.id %}">{{ post.title }}</a></td>
+                                <td>
+                                  <form method="post" action="{% url 'update_status' post.id %}">
+                                      {% csrf_token %}
+                                      <select name="status" onchange="this.form.submit()">
+                                          <option value="active" {% if post.status == 'active' %}selected{% endif %}>アクティブ</option>
+                                          <option value="pending" {% if post.status == 'pending' %}selected{% endif %}>保留</option>
+                                          <!-- 他のステータスに必要に応じてオプションを追加 -->
+                                      </select>
+                                  </form>
+                              </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- モーダル -->
+<!-- ここにモーダルのコンテンツを追加 -->
+
+{% endblock %}

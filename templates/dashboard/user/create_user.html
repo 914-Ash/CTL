@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Sign Up</title>
+
+    <!-- Custom fonts for this template-->
+    <link href="{% static 'vendor/fontawesome-free/css/all.min.css' %}" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles for this template-->
+    <link href="{% static 'css/sb-admin-2.min.css' %}" rel="stylesheet">
+
+    <!-- Password Strength Meter Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+
+    <style>
+        /* Add your custom styles for password strength feedback */
+    </style>
+
+    <!-- Custom scripts for password strength and form validation -->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+    <script>
+        // Function to check password strength and form submission
+        function checkFormValidity() {
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password1 = document.getElementById('exampleInputPassword').value;
+            const password2 = document.getElementById('exampleRepeatPassword').value;
+
+            // Priority 1: Check if the fields are inputted
+            if (!username || !email || !password1 || !password2) {
+                alert('すべての項目を入力してください。');
+                return false;
+            }
+
+            // Priority 2: Check if username and email already exist
+            // You need to implement your own logic to check for existing usernames and emails
+
+            // Priority 3: Check if passwords match
+            if (password1 !== password2) {
+                alert('パスワードが一致しません。');
+                return false;
+            }
+
+            // Priority 4: Check if password meets criteria
+            const criteriaMet = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/.test(password1);
+            if (!criteriaMet) {
+                alert('パスワードは、少なくとも 1 つの小文字、1 つの大文字、1 つの数字、および 1 つの句読点を含む 8 文字以上である必要があります');
+                return false;
+            }
+
+            return true; // All conditions met, proceed with form submission
+        }
+    </script>
+
+</head>
+
+<body class="bg-gradient-primary">
+
+    <div class="container">
+        <div class="card o-hidden border-0 shadow-lg my-5">
+            <div class="card-body p-0">
+                <div class="row">
+                    <div class="col-lg-5 d-none d-lg-block bg-register-image"></div>
+                    <div class="col-lg-7">
+                        <div class="p-5">
+                            {% if messages %}
+                            <div class="messages">
+                                {% for message in messages %}
+                                <div class="alert alert-primary" {% if message.tags %} class="{{ message.tags }}" {% endif %}>
+                                    {{ message }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% else %}
+                            <div class="text-center">
+                                <h1 class="h4 text-gray-900 mb-4">新規アカウントの登録!</h1>
+                            </div>
+                            {% endif %}
+                            <form class="user" method="POST" onsubmit="return checkFormValidity()">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <div class="col-sm-6 mb-3 mb-sm-0">
+                                        <input type="text" class="form-control form-control-user" id="exampleLastName" placeholder="姓" name="lname" required>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control form-control-user" id="exampleFirstName" placeholder="名" name="fname" required>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control form-control-user" id="username" placeholder="ユーザID" name="username" required>
+                                </div>
+                                <div class="form-group">
+                                    <input type="email" class="form-control form-control-user" id="email" placeholder="メールアドレス" name="email" required>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <input type="password" class="form-control form-control-user" id="exampleInputPassword" placeholder="パスワード" name="password1" required oninput="checkPasswordStrength(this)">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <div class="col-sm-12">
+                                        <input type="password" class="form-control form-control-user" id="exampleRepeatPassword" placeholder="パスワード（確認用）" name="password2" required oninput="checkPasswordStrength(this)">
+                                        <small>パスワードは、少なくとも 1 つの小文字、1 つの大文字、1 つの数字、および 1 つの句読点を含む 8 文字以上である必要があります</small>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-user btn-block" id="submitBtn">登録</button>
+                            </form>
+                            <hr>
+                            <div class="text-center">
+                                <a class="small" href="{% url 'password_reset' %}">パスワードを忘れた</a>
+                            </div>
+                            <div class="text-center">
+                                <a class="small" href="{% url 'login' %}">すでにアカウントをお持ちですか？ ログイン！</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'vendor/jquery-easing
