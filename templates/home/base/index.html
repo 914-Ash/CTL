@@ -4,9 +4,15 @@
     {% if user.is_authenticated %}
         {{ user.author.author.username }} | Dashboard
     {% else %}
-        Your Home Page Title
+        CHANGE THE LIFESTYLE
     {% endif %}
 {% endblock %}
+
+{% if success_message %}
+    <div class="alert alert-success">
+        {{ success_message }}
+    </div>
+{% endif %}
 
 {% block contents %}
     {% if not user.is_authenticated %}

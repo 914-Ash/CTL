@@ -6,8 +6,7 @@ class CatAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug':('name',)}
 
 admin.site.register(Idea)
-admin.site.register(Tag)
-
+admin.site.register(IdeaFile)
 
 
 # made by Nazrul Islam Yeasin 

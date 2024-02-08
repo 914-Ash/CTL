@@ -15,7 +15,7 @@ urlpatterns = [
     path('post/edit/<str:id>/', views.EditPost.as_view(), name='edit_post'),
     path('post/delete/<str:id>/', views.DeletePost.as_view(), name="delete_post"),
     # Author
-    path('reset_password/', auth_views.PasswordResetView.as_view(template_name='dashboard/user/reset_password.html'), name="password_reset"),
+    path('reset_password/', views.password_reset_request, name="password_reset"),
     path('reset_password_send/',auth_views.PasswordResetDoneView.as_view(template_name='dashboard/user/password_reset_done.html'),name="password_reset_done"),
     path('reset/<uidb64>/<token>/',auth_views.PasswordResetConfirmView.as_view(template_name='dashboard/user/password_reset_confirm.html'),name="password_reset_confirm"),
     path('reset_password_complete/',auth_views.PasswordResetCompleteView.as_view(template_name='dashboard/user/password_reset_complete.html'),name="password_reset_complete"),
@@ -23,13 +23,7 @@ urlpatterns = [
     path('dashboard/user/all_user/', views.AllUserView.as_view(), name='all_user'),
 
     path('user/delete_user/<int:pk>/', views.DeleteUserView.as_view(), name='delete_user'),
-    path('activate/<uidb64>/<token>/', views.ActivateAccountView.as_view(), name='activate'),
     path('profile/',views.AuthorProfile.as_view(), name='profile'),
     path('profile/edit/', views.EditAuthor.as_view(), name="edit"),
-    # tag
-    path('tag/', views.AddTag.as_view(), name='tag'),
-    path('add-tag/', views.AddTag.as_view(), name='add_tag'),
-    path('update-tag/', views.UpdateTag.as_view(), name='update_tag'),
-    path('delete-tag/', views.DeleteTag.as_view(), name='delete_tag'),
     
 ]

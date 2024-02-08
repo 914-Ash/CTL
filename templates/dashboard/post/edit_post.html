@@ -6,6 +6,13 @@
   <!-- Add any additional CSS styles if needed -->
   <style>
     /* Your custom styles go here */
+    img.preview {
+      width: 100%;
+      max-height: 300px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 10px;
+    }
   </style>
 {% endblock %}
 
@@ -43,14 +50,55 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label" for="customFile">画像の更新</label>
+                        {% if obj.image %}
+                          <img src="{{ obj.image.url }}" alt="Current Image" class="preview">
+                        {% endif %}
                         <input type="file" class="form-control" id="customFile" name="image" />
                     </div>
+
                     <input type="submit" value="Update">
                 </form>
+
+                <!-- Confirmation Modal -->
+                <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="confirmationModalLabel">更新の確認</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <p>このアイディアを本当に更新しますか？</p>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
+                        <button type="submit" class="btn btn-primary">更新</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
             </div>
         </div>
     </div>
 
 </div>
+
+<script>
+  // Confirm update before submission
+  $(document).ready(function() {
+    $('#confirmationModal').on('show.bs.modal', function (e) {
+      // Prevent form submission when modal is shown
+      e.preventDefault();
+
+      // Trigger form submission when modal '更新' button is clicked
+      $('#confirmationModal .btn-primary').click(function () {
+        $('#editForm').submit();
+      });
+    });
+  });
+</script>
 
 {% endblock %}

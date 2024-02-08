@@ -4,6 +4,20 @@
 
 {% block custom_css %}
     <!-- Add your custom CSS styles if needed -->
+    <style>
+        .confirmation-container {
+            padding: 20px;
+        }
+
+        .confirmation-text {
+            margin-bottom: 20px;
+        }
+
+        .confirmation-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
 {% endblock %}
 
 {% block body %}
@@ -23,20 +37,20 @@
 
         <div class="row">
             <div class="col">
-                <div class="card shadow mb-4">
-                    <div class="row" style="padding: 20px;">
+                <div class="card shadow mb-4 confirmation-container">
+                    <div class="row">
                         <div class="col-10 mx-auto">
-                            <h3>アイディアの削除。</h3>
-                            <p>このアイディアを本当に削除しますか</p>
+                            <h3 class="confirmation-text">アイディアの削除</h3>
+                            <p class="confirmation-text">このアイディアを本当に削除しますか？</p>
 
                             <!-- Delete Button -->
                             <form action="{% url 'delete_post' post.id %}" method="POST">
                                 {% csrf_token %}
-                                <input type="submit" class="btn btn-danger" value="Delete">
+                                <div class="confirmation-buttons">
+                                    <input type="submit" class="btn btn-danger" value="削除">
+                                    <a href="{% url 'all_post' %}" class="btn btn-secondary">キャンセル</a>
+                                </div>
                             </form>
-
-                            <!-- Cancel Button -->
-                            <a href="{% url 'all_post' %}" class="btn btn-secondary">キャンセル</a>
                         </div>
                     </div>
                 </div>

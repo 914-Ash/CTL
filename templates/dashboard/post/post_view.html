@@ -35,15 +35,15 @@ h3 {
 
 <div class="container-fluid">
     {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-        <div class="alert alert-primary" {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-primary" {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
     {% endif %}
 
     <div class="row">
@@ -51,39 +51,46 @@ h3 {
             <div class="card shadow mb-4">
                 <div class="row" style="padding: 20px;">
                     <div class="col-10 mx-auto">
-                        <h3>{{ post.title }}</h3>
+                        <h5>{{ post.title }}</h5>
                         <div class="text_div">
                             <p>Date: {{ post.created_at|date:"Y-m-d" }}</p>
                             {% if post.status == 'active' %}
-                            <p>Status: <span style="color: green;"> {{ post.status }}</span> </p>
+                                <p>Status: <span style="color: green;"> {{ post.status }}</span> </p>
                             {% else %}
-                            <p>Status: <span
-                                    style="color: red; background-color: rgb(70, 123, 172); padding: 5px; border-radius: 10px; ">{{ post.status }}</span>
-                            </p>
-                            {% endif %}
-                            {% if post.featured == True %}
-                            <p>Featured : <span style="color:green"> 人気物</span> </p>
-                            {% else %}
-                            <p>Featured : <span style="color:red"> 未人気</span></p>
+                                <p>Status: <span style="color: red; background-color: rgb(70, 123, 172); padding: 5px; border-radius: 10px; ">{{ post.status }}</span></p>
                             {% endif %}
                         </div>
+                        
                         {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="">
+                            <img src="{{ post.image.url }}" alt="{{ post.title }}">
                         {% else %}
-                        <img src="" alt="">
+                            <img src="" alt="">
                         {% endif %}
+                        
                         <h5>{{ post.detail }}</h5>
+                        {% if post.files.all %}
+                            <h4>添付ファイル</h4>
+                            <ul>
+                                {% for file in post.files.all %}
+                                    <li><a href="{{ file.file.url }}" target="_blank">{{ file.file.name|slice:"11:" }}</a></li>
+                                {% endfor %}
+
+                            </ul>
+                        {% else %}
+                            <p>ファイルが添付されていない。</p>
+                        {% endif %}
+                        
 
                         <hr>
                         <hr>
                         
                         {% if user.is_authenticated %}
-                          {% if user.is_staff or user.is_superuser or user.author == post.author %}
-                              <!-- Add Edit and Delete buttons -->
-                              <a href="{% url 'edit_post' post.id %}" class="btn btn-warning btn-sm"><i class="far fa-edit"></i> 編集</a>
-                              <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete"><i class="far fa-trash-alt"></i> 削除 </a>
-                          {% endif %}
-                      {% endif %}
+                            {% if user.is_staff or user.is_superuser or user.author == post.author %}
+                                <!-- Add Edit and Delete buttons -->
+                                <a href="{% url 'edit_post' post.id %}" class="btn btn-warning btn-sm"><i class="far fa-edit"></i> 編集</a>
+                                <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete"><i class="far fa-trash-alt"></i> 削除 </a>
+                            {% endif %}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -108,12 +115,20 @@ h3 {
         <button type="button" class="btn btn-secondary" data-dismiss="modal">閉じる</button>
         <form action="{% url 'delete_post' post.id %}" method="POST">
             {% csrf_token %}
-          
-          <input type="submit" class="btn btn-danger" placeholder="Delete">
-
+            <input type="submit" class="btn btn-danger" value="Delete">
         </form>
       </div>
     </div>
   </div>
 </div>
+
+<script>
+    document.querySelectorAll('.file-link').forEach(function(link) {
+        link.addEventListener('click', function() {
+            var fileUrl = this.getAttribute('data-file-url');
+            window.open(fileUrl, '_blank');
+        });
+    });
+</script>
+
 {% endblock %}

@@ -32,6 +32,7 @@
                         <tr>
                             <th> No. </th>
                             <th> ユーザID </th>
+                            <th> メールアドレス </th>
                             <th> 削除 </th>
                         </tr>
                     </thead>
@@ -41,6 +42,7 @@
                                 <tr>
                                     <td>{{ forloop.counter }}</td>
                                     <td><a href="{% url 'all_user' %}">{{ user.username }}</a></td>
+                                    <td>{{ user.email }}</td>
                                     <td>
                                         <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm">削除</a>
                                     </td>

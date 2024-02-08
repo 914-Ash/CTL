@@ -1,14 +1,8 @@
 import idea
-from django import views
-from django.core import paginator
-from django.http import HttpResponseRedirect
-from django.db.models.fields import EmailField
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render,get_object_or_404
 from django.views import View
-from .models import Idea, Tag
+from .models import Idea
 from django.core.paginator import Paginator
-from django.db.models import Count 
-from django.contrib import messages
 from django.core.paginator import Paginator
 from django.db.models import Q
 
@@ -32,18 +26,7 @@ class HomeView(View):
         }
         return render(request, 'home/index.html', context)
 
-# tag View
-class TagView(View):
-    def get(self,request,id,*args,**kwargs):
-        tag_obj = get_object_or_404(Tag, id=id)
-        post = tag_obj.idea_set.all().order_by('-id')
-        tag_count = post.count()
-        context={
-            'tag':tag_obj,
-            'post':post,
-            'tag_count':tag_count
-        }
-        return render(request,'home/tag.html',context)
+
 
 class SearchView(View):
     def get(self,request,*args,**kwargs):

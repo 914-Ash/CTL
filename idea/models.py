@@ -1,45 +1,65 @@
-
-import uuid
 from django.db import models
+from django.dispatch import receiver
+import os
 from dashboard.models import Author
-from dashboard.models import User
 
-# tags model
-class Tag(models.Model):
+class IdeaFile(models.Model):
+    idea = models.ForeignKey('Idea', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='idea_files/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
 
-    name  = models.CharField(max_length=100, null=True)
+    @classmethod
+    def create(cls, idea, file):
+        idea_file = cls(idea=idea, file=file)
+        idea_file.save()
+        return idea_file
 
-    def __str__(self):
-        return self.name 
-    
+@receiver(models.signals.post_delete, sender=IdeaFile)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem
+    when corresponding `IdeaFile` object is deleted.
+    """
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)
+
 class Idea(models.Model):
     status = (
-        ('active','active'),
-        ('pending','pending')
+        ('active', 'active'),
+        ('pending', 'pending')
     )
 
-    title  = models.CharField(max_length=200, null=True)
+    title = models.CharField(max_length=200, null=True)
     detail = models.TextField(max_length=2000, null=True)
     image = models.ImageField(upload_to='images/media', null=True, blank=True)
-    tags = models.ManyToManyField(Tag, blank=True)
     status = models.CharField(max_length=20, choices=status, default='pending')
-    #show_hide = models.CharField(max_length=5,choices=visibility, default='show')
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
-    featured  = models.BooleanField(default=False)
+    email_text = models.CharField(max_length=255, blank=True, null=True, verbose_name='Email')
+    featured = models.BooleanField(default=False)
     visit_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    files = models.ManyToManyField(IdeaFile, related_name='idea_files', blank=True)
 
     class Meta:
-        verbose_name_plural = 'Idea'
+        verbose_name_plural = 'Ideas'
 
     def overview(self):
         short = self.detail[:30]
-        return short 
-    
+        return short
+
     @property
     def image_url(self):
         if self.image and hasattr(self.image, 'url'):
-            return self.image.url 
+            return self.image.url
+
+    def delete(self, *args, **kwargs):
+        # Delete associated files
+        for idea_file in self.files.all():
+            idea_file.delete()
+
+        # Delete the post itself
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         author_username = self.author.author.username if self.author and self.author.author else self.author.first_name

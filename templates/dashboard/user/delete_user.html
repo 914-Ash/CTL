@@ -1,6 +1,6 @@
 {% extends 'dashboard/base/base.html' %}
 
-{% block title %} Delete USER | Dashboard {% endblock %}
+{% block title %} ユーザ削除 | Dashboard {% endblock %}
 
 {% block custom_css %}
     <!-- Add your custom CSS styles if needed -->
@@ -26,7 +26,7 @@
                 <div class="card shadow mb-4">
                     <div class="row" style="padding: 20px;">
                         <div class="col-10 mx-auto">
-                            <h3>Delete User</h3>
+                            <h3>アカウントの削除</h3>
                             <p>ユーザを本当に削除しますか？</p>
 
                             <!-- Delete Button -->
@@ -37,7 +37,7 @@
                             
 
                             <!-- Cancel Button -->
-                            <a href="{% url 'all_user' %}" class="btn btn-secondary">Cancel</a>
+                            <a href="{% url 'edit' %}" class="btn btn-secondary">キャンセル</a>
                         </div>
                     </div>
                 </div>

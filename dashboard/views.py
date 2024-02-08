@@ -1,7 +1,7 @@
 from django.shortcuts import render,redirect,get_object_or_404
 from django.views import View
 from django.views.generic.edit import DeleteView
-from idea.models import Idea, Tag
+from idea.models import Idea, IdeaFile
 from product.models import Product
 from .models import Author
 from django.contrib import messages
@@ -25,46 +25,42 @@ from django.views import View
 
 # Create Author 
 class CreateAuthor(View):
-    def get(self,request,*args,**kwargs):
+    template_name = 'dashboard/user/create_user.html'
+
+    def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return redirect('dashboard')
-        return render(request,'dashboard/user/create_user.html')
+        return render(request, self.template_name)
 
-    def post(self,request,*args,**kwargs):
-        if request.method == 'POST':
-            username = request.POST.get('username')
-            email = request.POST.get('email')
-            first_name = request.POST.get('fname')
-            last_name = request.POST.get('lname')
-            password1 = request.POST.get('password1')
-            password2 = request.POST.get('password2')
-            user = User.objects.filter(username=username,email=email,first_name=first_name,last_name=last_name)
-            email_obj = Author.objects.filter(email=email)
-            if user:
-                messages.warning(request,'ユーザIDがすでに存在します！')
-                return redirect ('create_user')
-            elif password1 != password2:
-                messages.warning(request,'入力された２つのパスワードが一致しない！')
-                return redirect('create_user')
-            else:
-                auth_info={
-                    'username':username,
-                    'email':email,
-                    'last_name':last_name,
-                    'first_name':first_name,
-                    'password':make_password(password1)
-                }
-                user = User(**auth_info)
-                user.save()
-            if email_obj:   
-                messages.warning(request,'メールアドレスがすでに使われている!')
-                return redirect('create_user')
-            else:
-                user_other_obj = Author(author=user, email_text=email, first_name=first_name, last_name= last_name)
-                user_other_obj.save(Author)
-                messages.success(request,'ご登録いただきありがとうございます ログインしてください')
-                return redirect('login')
+    def post(self, request, *args, **kwargs):
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        first_name = request.POST.get('fname')
+        last_name = request.POST.get('lname')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
 
+        # Validation
+        if User.objects.filter(username=username).exists():
+            messages.warning(request, 'ユーザIDがすでに存在します！')
+            return redirect('create_user')
+
+        if password1 != password2:
+            messages.warning(request, '入力された２つのパスワードが一致しません！')
+            return redirect('create_user')
+
+        # Create User
+        user = User(username=username, email=email, first_name=first_name, last_name=last_name)
+        user.set_password(password1)
+        user.save()
+
+        # Create Author
+        author = Author(author=user, email_text=email, first_name=first_name, last_name=last_name)
+        author.save()
+
+        messages.success(request, 'ご登録いただきありがとうございます。ログインしてください。')
+        return redirect('login')
+    
 # Author Profile
 class AuthorProfile(View):
     @method_decorator(login_required(login_url='login'))
@@ -81,11 +77,9 @@ class AuthorProfile(View):
         } 
         return render(request,'dashboard/user/profile.html', context)
 
-class EditAuthor(View):
-    @method_decorator(login_required(login_url='login'))
-    def dispatch(self, request, *args, **kwargs):
-        return super().dispatch(request, *args, **kwargs)
 
+class EditAuthor(View):
+    @method_decorator(login_required(login_url='login'), name='dispatch')
     def get(self, request):
         return render(request, 'dashboard/user/edit_profile.html')
 
@@ -99,15 +93,20 @@ class EditAuthor(View):
         # Update other fields
         obj.first_name = request.POST.get('fname', obj.first_name)
         obj.last_name = request.POST.get('lname', obj.last_name)
-        obj.email = request.POST.get('email', obj.email)
-        obj.save()
+        new_email = request.POST.get('email', user.email)
 
-        # Handle checkbox for active status
-        user.is_active = 'active' in request.POST
+        # Check if the new email is already registered by another user
+        if new_email != user.email and User.objects.filter(email=new_email).exists():
+            messages.error(request, 'このメールアドレスがすでに使われています。')
+            return redirect('edit')
 
+        user.email = new_email
         user.save()
+        obj.email_text = new_email 
 
-        messages.success(request, 'あなたのプロファイルが正常に更新されました')
+        obj.save()  # Save the Author object
+
+        messages.success(request, 'プロフィールを更新しました。')
         return redirect('profile')
     
 
@@ -173,7 +172,7 @@ class ActivateAccountView(View):
             # Activate the user
             user.is_active = True
             user.save()
-            messages.success(request, 'アカウントの再開に成功。またログインできるようになりました。')
+            messages.success(request, 'ログインに成功しました。')
         else:
             messages.error(request, '無効なリンク。')
 
@@ -188,82 +187,40 @@ class LogoutView(View):
     def get(self,request,*args,**kwargs):
         logout(request)
         return redirect('home')
-
-
-
-
-# Tag functions
-class TagFunction(View):
-    @method_decorator(login_required(login_url='login'))
-    def dispatch(self,request,*args,**kwargs):
-        return super().dispatch(request,*args,**kwargs)
-
-    def get(self, request):
-        tag_obj = Tag.objects.all().order_by('-id')
-        context = {
-            'tag':tag_obj
-        }   
-        return render (request,'dashboard/tag/tag.html', context)
-        
-# add Tags
-class AddTag(View):
-    @method_decorator(login_required(login_url='login'))
-    def dispatch(self,request,*args,**kwargs):
-        return super().dispatch(request,*args,**kwargs)
-
-    def get(self,request):
-        return render(request,'dashboard/tag/tag.html')
-
-    def post(self,request):
-        if request.method == 'POST':
-            tag= request.POST.get('tag')
-            obj = Tag.objects.create(name=tag)
-            obj.save()
-            return redirect('tag')
-
-# update Tags
-class UpdateTag(View):
-    @method_decorator(login_required(login_url='login'))
-    def dispatch(self,request,*args,**kwargs):
-        return super().dispatch(request,*args,**kwargs)
-
-    def post(self,request, id):
-        obj = get_object_or_404(Tag, id=id)
-        obj.name = request.POST.get('tag')
-        obj.save()
-        return redirect('tag')
-
-# Delete Tags
-class DeleteTag(View):
-    @method_decorator(login_required(login_url='login'))
-    def dispatch(self,request,*args,**kwargs):
-        return super().dispatch(request,*args,**kwargs)
-
-    def post(self, request, id):
-        obj = get_object_or_404(Tag, id=id)
-        obj.delete() 
-        return redirect('tag') 
+ 
 
 # Post Lists 
 # Create Post
 class CreatePost(View):
     @method_decorator(login_required(login_url='login'))
-    def dispatch(self,request,*args,**kwargs):
-        return super().dispatch(request,*args,**kwargs)
-    
-    def get(self,request):
-        return render(request,'dashboard/post/create_post.html')
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
-    def post(self,request):
+    def get(self, request):
+        return render(request, 'dashboard/post/create_post.html')
+
+    def post(self, request):
         author = request.user.author
+        email_text = author.email_text
         title = request.POST.get('title')
         detail = request.POST.get('detail')
         image = request.FILES.get('image')
 
-        post_obj = Idea(author=author,title=title, detail=detail,image=image)
-        post_obj.save(post_obj)
-        messages.success(request,'アイディアを投稿しました')
+        # Create the Idea object
+        post_obj = Idea.objects.create(author=author, email_text=email_text, title=title, detail=detail, image=image)
+
+        # Handle file uploads
+        files = request.FILES.getlist('files')
+
+        for file in files:
+        # Create IdeaFile instance
+            idea_file = IdeaFile.objects.create(idea=post_obj, file=file)
+        # Add IdeaFile instance to the many-to-many relationship
+            post_obj.files.add(idea_file)
+
+        messages.success(request, 'アイディアを投稿しました')
         return redirect('all_post')
+    
 
 # All Post show
 
@@ -282,16 +239,18 @@ class AllPost(View):
 
 # Post detail 
 class PostView(View):
-    def dispatch(self, request,*args,**kwargs):
-        return super().dispatch(request,*args,**kwargs)
-    
-    def get(self, request,id):
-        post_obj = get_object_or_404(Idea, id=id)
-        context={
-            'post':post_obj
-        }
-        return render(request,'dashboard/post/post_view.html', context)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
 
+    def get(self, request, id):
+        post_obj = get_object_or_404(Idea, id=id)
+        files = post_obj.files.all()  # Fetch associated files
+        context = {
+            'post': post_obj,
+            'files': files,  # Include files in the context
+        }
+        return render(request, 'dashboard/post/post_view.html', context)
+    
 
         
 class EditPost(View):
@@ -378,8 +337,6 @@ class UpdateStatusView(View):
             try:
                 # Save the product (either the new one or the updated existing one)
                 product.save()
-                # Update the tags using set() method
-                product.tags.set(idea.tags.all())
             except IntegrityError as e:
                 # Handle IntegrityError if needed (e.g., unique constraint violation)
                 print(f"IntegrityError: {e}")
@@ -397,13 +354,18 @@ class UpdateStatusView(View):
 class DeleteUserView(DeleteView):
     model = User
     template_name = 'dashboard/user/delete_user.html'
-    success_url = reverse_lazy('all_user')
+
+    def get_success_url(self):
+        if self.request.user.is_authenticated:
+            return reverse_lazy('all_user')  # Replace 'all_users' with your actual URL name
+        else:
+            return reverse_lazy('login')
 
     def delete(self, request, *args, **kwargs):
         # Delete the User instance using the parent class method
         response = super().delete(request, *args, **kwargs)
 
-        messages.success(request, 'User deleted successfully.')
+        messages.success(request, 'ユーザの削除に成功。')
 
         return response
 
@@ -420,3 +382,25 @@ class AllUserView(View):
         }
 
         return render(request, self.template_name, context)
+
+from django.contrib.auth.forms import PasswordResetForm
+
+def password_reset_request(request):
+    if request.method == "POST":
+        email = request.POST['email']
+        # Check if the email exists in the database
+        if User.objects.filter(email=email).exists():
+            # The email is registered, proceed with sending the reset link
+            form = PasswordResetForm(request.POST)
+            if form.is_valid():
+                # Your password reset logic here
+                # Send the reset link and redirect to success page
+                return redirect('password_reset_done')
+        else:
+            # The email is not registered, show an error message
+            messages.error(request, 'メールアドレスが登録されていません。')
+            return render(request, 'dashboard/user/reset_password.html')
+    else:
+        form = PasswordResetForm()
+        return render(request, 'dashboard/user/reset_password.html', {'form': form})
+    
