@@ -3,6 +3,7 @@ from django.views import View
 from django.views.generic.edit import DeleteView
 from idea.models import Idea, IdeaFile
 from product.models import Product
+from django.contrib.auth.decorators import user_passes_test
 from .models import Author
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -254,7 +255,7 @@ class PostView(View):
 
         
 class EditPost(View):
-    @method_decorator(login_required(login_url='login'))   
+    @method_decorator(login_required(login_url='login'))
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
@@ -266,10 +267,30 @@ class EditPost(View):
         obj = get_object_or_404(Idea, id=id)
         obj.title = request.POST.get('title')
         obj.detail = request.POST.get('detail')
-        obj.image = request.FILES.get('image')
-        obj.save()
-        messages.success(request, 'アイディアを更新しました。')
-        return redirect('all_post')
+
+        # Check if a new image is provided
+        new_image = request.FILES.get('image')
+        if new_image:
+            obj.image = new_image
+
+        # Handle file updates
+        new_files = request.FILES.getlist('files')
+
+        # Clear existing files associated with the Idea object
+        if new_files:
+            obj.files.clear()
+
+            for file in new_files:
+                # Create IdeaFile instance
+                idea_file = IdeaFile.objects.create(idea=obj, file=file)
+                # Add IdeaFile instance to the many-to-many relationship
+                obj.files.add(idea_file)
+
+            obj.save()
+        else:
+
+            messages.success(request, 'アイディアを更新しました。')
+            return redirect('all_post')
 
 
 
@@ -356,24 +377,29 @@ class DeleteUserView(DeleteView):
     template_name = 'dashboard/user/delete_user.html'
 
     def get_success_url(self):
-        if self.request.user.is_authenticated:
-            return reverse_lazy('all_user')  # Replace 'all_users' with your actual URL name
+        if self.request.user.is_authenticated and self.request.user.is_superuser:
+            return reverse_lazy('all_user')  # Redirect to 'all_user' if the user is a superuser
         else:
-            return reverse_lazy('login')
+            return reverse_lazy('login')  # Redirect to 'login' if the user is not a superuser
 
     def delete(self, request, *args, **kwargs):
         # Delete the User instance using the parent class method
         response = super().delete(request, *args, **kwargs)
 
-        messages.success(request, 'ユーザの削除に成功。')
+        messages.success(request, 'ユーザの削除に成功。')  # Display a success message
 
         return response
-
+    
 
 class AllUserView(View):
     template_name = 'dashboard/user/all_user.html'
 
     def get(self, request):
+        # Check if the user is authenticated and a staff member
+        if not request.user.is_authenticated or not request.user.is_staff:
+            # Redirect to the login page if not authenticated or not a staff member
+            return redirect('login')
+
         # Get all users
         all_users = User.objects.all().order_by('-id')
 

@@ -55,8 +55,17 @@
                         {% endif %}
                         <input type="file" class="form-control" id="customFile" name="image" />
                     </div>
+                    <div class="form-group">
+                      <label class="form-label" for="customFiles">添付ファイルの更新</label>
+                      {% if obj.files.all %}
+                          {% for file in obj.files.all %}
+                              <p><a href="{{ file.file.url }}" target="_blank">{{ file.file.name|slice:"11:" }}</a></p>
+                          {% endfor %}
+                      {% endif %}
+                      <input type="file" class="form-control" id="customFiles" name="files" multiple />
+                  </div>
 
-                    <input type="submit" value="Update">
+                    <input type="submit" value="更新">
                 </form>
 
                 <!-- Confirmation Modal -->
