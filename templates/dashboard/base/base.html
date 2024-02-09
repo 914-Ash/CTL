@@ -45,9 +45,11 @@
 
                         
                         <!-- Visit website link -->
-                        <h2><a style="color:blue" href="{% url 'home' %}" > <i class="fa fa-link"> CHANGE THE LIFESTYLE</i> </a></h2>
-
-                        
+                        <li class="nav-item mx-1"> 
+                            <a class="nav-link" style="color: blue; font-size: 30px; font-weight: bold;" href="{% url 'home' %}"> 
+                                     CHANGE THE LIFESTYLE 
+                            </a>
+                        </li>
 
                         <div class="topbar-divider d-none d-sm-block"></div>
                         {% if user.is_authenticated %}
