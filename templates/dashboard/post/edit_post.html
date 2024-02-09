@@ -48,13 +48,15 @@
                         <label for="detail">詳細の更新</label>
                         <textarea class="form-control" id="detail" name="detail" rows="10" placeholder="Edit Blog Details" required>{{ obj.detail }}</textarea>
                     </div>
+                    <hr>
                     <div class="form-group">
                         <label class="form-label" for="customFile">画像の更新</label>
                         {% if obj.image %}
-                          <img src="{{ obj.image.url }}" alt="Current Image" class="preview">
+                          <img src="{{ obj.image.url }}" alt="Current Image" class="preview" style="width: 300px; height: auto;">
                         {% endif %}
                         <input type="file" class="form-control" id="customFile" name="image" />
                     </div>
+                    <hr>
                     <div class="form-group">
                       <label class="form-label" for="customFiles">添付ファイルの更新</label>
                       {% if obj.files.all %}
@@ -64,7 +66,7 @@
                       {% endif %}
                       <input type="file" class="form-control" id="customFiles" name="files" multiple />
                   </div>
-
+                  <hr>
                     <input type="submit" value="更新">
                 </form>
 
