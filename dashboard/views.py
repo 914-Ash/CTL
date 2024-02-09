@@ -46,6 +46,10 @@ class CreateAuthor(View):
             messages.warning(request, 'ユーザIDがすでに存在します！')
             return redirect('create_user')
 
+        if User.objects.filter(email=email).exists():
+            messages.warning(request, 'メールアドレスがすでに使用されています！')
+            return redirect('create_user')
+        
         if password1 != password2:
             messages.warning(request, '入力された２つのパスワードが一致しません！')
             return redirect('create_user')
