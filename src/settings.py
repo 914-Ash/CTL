@@ -144,6 +144,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'images/')
 LOGIN_URL = 'home'  
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
 # settings.py
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

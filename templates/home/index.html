@@ -9,72 +9,62 @@
 {% endblock %}
 
 {% block contents %}
-    {% if not user.is_authenticated %}
-    <nav class="navbar navbar-expand-lg navbar-light bg-black fixed-top">
-        <div class="container px-5">
-            <a class="navbar-brand" style="color: white;" href="{% url 'home' %}">CHANGE THE LIFESTYLE</a>
-    
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-    
-            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
-                <ul class="navbar-nav">
-
-                    <li class="nav-item">
-                        <a href="{% url 'login' %}" class="btn btn-warning mx-2">Log In</a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="{% url 'create_user' %}" class="btn btn-warning mx-2">Sign Up</a>
-                    </li>
-                    
-                </ul>
-            </div>
-        </div>
-    </nav>
-    
-    
-    
-
-    <div class="container mt-5">
-    {% endif %}
-
-    {% block body %}
-        <h2 class="text-center mt-4">実績（商品化されたもの）</h2>
-
-        <!-- Display Featured Posts -->
-        <h4>人気品</h4>
-        {% for post in featured_posts %}
-            <div class="post">
-                <h3><a href="{% url 'post' post.id %}">{{ post.title }}</a></h3>
-                {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="" style="max-width: 300px; max-height: 200px;">
-                        {% else %}
-                        <img src="" alt="">
-                        {% endif %}
-            </div>
-            <hr>
-        {% endfor %}
-
-        <!-- Display Paginated Posts -->
-        <h5>商品化一覧</h5>
-        {% for post in posts %}
-            <div class="post">
-                <h3><a href="{% url 'post' post.id %}">{{ post.title }}</a></h3>
-                {% if post.image %}
-                        <img src="{{ post.image.url }}" alt="" style="max-width: 300px; max-height: 200px;">
-                        {% else %}
-                        <img src="" alt="">
-                        {% endif %}
-            </div>
-            <hr>
-        {% endfor %}
-
-        <!-- Add Pagination Controls -->
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        {% if not user.is_authenticated %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-black fixed-top">
+            <div class="container px-5">
+                <a class="navbar-brand" style="color: white;" href="{% url 'home' %}">CHANGE THE LIFESTYLE</a>
         
-    {% endblock %}
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+        
+                <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                    <ul class="navbar-nav">
+                        {% if user.is_authenticated %}
+                            <!-- Add authenticated user navigation items here -->
+                        {% else %}
+                            <li class="nav-item">
+                                <a href="{% url 'login' %}" class="btn btn-warning mx-2">Log In</a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'create_user' %}" class="btn btn-warning mx-2">Sign Up</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </nav>
 
-    {% if not user.is_authenticated %}
-    </div> <!-- Closing container for content -->
-    {% endif %}
+        <div class="container mt-5">
+        {% endif %}
+
+        {% block body %}
+            <h2 class="text-center mt-4">実績（商品化されたもの）</h2>
+            {% for post in posts %}
+            <div class="post">
+                <h3><a href="{% url 'post' post.id %}">{{ post.title }}</a></h3>
+                {% if post.image %}
+                <a href="{% url 'post' post.id %}">
+                    <img src="{{ post.image.url }}" alt="" style="max-width: 300px; max-height: 200px;">
+                </a>
+                        {% else %}
+                        <img src="" alt="">
+                        {% endif %}
+            </div>
+            <hr>
+            {% endfor %}
+        {% endblock %}
+
+        {% if not user.is_authenticated %}
+        </div> <!-- Closing container for content -->
+        {% endif %}
+    </body>
+    </html>
 {% endblock %}

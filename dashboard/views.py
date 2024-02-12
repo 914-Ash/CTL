@@ -3,7 +3,6 @@ from django.views import View
 from django.views.generic.edit import DeleteView
 from idea.models import Idea, IdeaFile
 from product.models import Product
-from django.contrib.auth.decorators import user_passes_test
 from .models import Author
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -129,7 +128,7 @@ class LoginView(View):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             # User does not exist, show a warning message
-            messages.warning(request, 'ユーザIDかパスワードが間違っています。')
+            messages.warning(request, 'ユーザが存在しません。')
             return redirect('login')
 
         # Check the password manually
@@ -414,6 +413,14 @@ class AllUserView(View):
         return render(request, self.template_name, context)
 
 from django.contrib.auth.forms import PasswordResetForm
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth.models import User
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.urls import reverse
+
 
 def password_reset_request(request):
     if request.method == "POST":
@@ -433,4 +440,3 @@ def password_reset_request(request):
     else:
         form = PasswordResetForm()
         return render(request, 'dashboard/user/reset_password.html', {'form': form})
-    
