@@ -48,8 +48,8 @@
                                   <form method="post" action="{% url 'update_status' post.id %}">
                                       {% csrf_token %}
                                       <select name="status" onchange="this.form.submit()">
-                                          <option value="active" {% if post.status == 'active' %}selected{% endif %}>商品化</option>
-                                          <option value="pending" {% if post.status == 'pending' %}selected{% endif %}>保留</option>
+                                          <option value="商品化" {% if post.status == '商品化' %}selected{% endif %}>商品化</option>
+                                          <option value="保留" {% if post.status == '保留' %}selected{% endif %}>保留</option>
                                           <!-- 他のステータスに必要に応じてオプションを追加 -->
                                       </select>
                                   </form>

@@ -16,24 +16,21 @@ class IdeaFile(models.Model):
 
 @receiver(models.signals.post_delete, sender=IdeaFile)
 def auto_delete_file_on_delete(sender, instance, **kwargs):
-    """
-    Deletes file from filesystem
-    when corresponding `IdeaFile` object is deleted.
-    """
+
     if instance.file:
         if os.path.isfile(instance.file.path):
             os.remove(instance.file.path)
 
 class Idea(models.Model):
     status = (
-        ('active', 'active'),
-        ('pending', 'pending')
+        ('商品化', '商品化'),
+        ('保留', '保留')
     )
 
     title = models.CharField(max_length=200, null=True)
     detail = models.TextField(max_length=2000, null=True)
     image = models.ImageField(upload_to='images/media', null=True, blank=True)
-    status = models.CharField(max_length=20, choices=status, default='pending')
+    status = models.CharField(max_length=20, choices=status, default='保留')
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     email_text = models.CharField(max_length=255, blank=True, null=True, verbose_name='Email')
     featured = models.BooleanField(default=False)
