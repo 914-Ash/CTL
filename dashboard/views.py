@@ -2,7 +2,6 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django.views import View
 from django.views.generic.edit import DeleteView
 from idea.models import Idea, IdeaFile
-from product.models import Product
 from .models import Author
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -21,6 +20,7 @@ from django.utils.http import urlsafe_base64_decode
 from django.core.mail import send_mail
 from django.shortcuts import render
 from django.views import View
+from django.utils import timezone
 
 
 # Create Author 
@@ -148,39 +148,7 @@ class LoginView(View):
             messages.warning(request, 'ユーザIDかパスワードが間違っています。')
             return redirect('login')
 
-    def send_activation_email(self, request, user):
-        # Generate activation token
-        token = default_token_generator.make_token(user)
-        
-        # Build activation URL
-        activation_url = request.build_absolute_uri(
-            reverse('activate', args=[urlsafe_base64_encode(force_bytes(user.pk)), token])
-        )
 
-        # Send activation email
-        subject = 'アカウントの再開'
-        message = f'下記のリンクを押してアカウントの再開する:\n\n{activation_url}'
-        from_email = 'your_email@example.com'  # Replace with your email
-        to_email = user.email
-        send_mail(subject, message, from_email, [to_email])
-
-class ActivateAccountView(View):
-    def get(self, request, uidb64, token):
-        try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
-            user = User.objects.get(pk=uid)
-        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-            user = None
-
-        if user is not None and default_token_generator.check_token(user, token):
-            # Activate the user
-            user.is_active = True
-            user.save()
-            messages.success(request, 'ログインに成功しました。')
-        else:
-            messages.error(request, '無効なリンク。')
-
-        return redirect('login')
 
 # Logout View
 class LogoutView(View):
@@ -290,10 +258,13 @@ class EditPost(View):
                 obj.files.add(idea_file)
 
             obj.save()
-        else:
-
             messages.success(request, 'アイディアを更新しました。')
             return redirect('all_post')
+        else:
+            obj.save()
+            messages.success(request, 'アイディアを更新しました。')
+            return redirect('all_post')
+
 
 
 
@@ -335,64 +306,33 @@ class UpdateStatusView(View):
         new_status = request.POST.get('status')
 
         # Perform validation and update status as needed
-        idea.status = new_status
-        idea.save()
+        if new_status in ['商品化', '保留']:
+            idea.status = new_status
+            idea.new_date_field = timezone.now()  # Add a new date field to your model
+            idea.save()
 
         # Check if the status is changed to 'active'
-        if new_status == 'active':
-            try:
-                # Try to get an existing product associated with the idea
-                product = Product.objects.get(title=idea.title, author=idea.author)
-            except Product.DoesNotExist:
-                # If no existing product, create a new one
-                product = Product(
-                    title=idea.title,
-                    description=idea.detail,
-                    image=idea.image,
-                    status=idea.status,
-                    author=idea.author,
-                )
-            else:
-                # Update the existing product
-                product.description = idea.detail
-                product.image = idea.image
-                product.status = idea.status
-
-            try:
-                # Save the product (either the new one or the updated existing one)
-                product.save()
-            except IntegrityError as e:
-                # Handle IntegrityError if needed (e.g., unique constraint violation)
-                print(f"IntegrityError: {e}")
-        elif new_status == 'pending':
-            # Check if there is an associated product and delete it
-            try:
-                product = Product.objects.get(title=idea.title, author=idea.author)
-                product.delete()
-            except Product.DoesNotExist:
-                pass  # No product to delete
-
-        # Redirect back to the page or wherever you want
         return redirect('admin_all_post')
 
+
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 class DeleteUserView(DeleteView):
     model = User
-    template_name = 'dashboard/user/delete_user.html'
 
     def get_success_url(self):
         if self.request.user.is_authenticated and self.request.user.is_superuser:
-            return reverse_lazy('all_user')  # Redirect to 'all_user' if the user is a superuser
+            return reverse_lazy('all_user')
         else:
-            return reverse_lazy('login')  # Redirect to 'login' if the user is not a superuser
+            return reverse_lazy('login')
 
     def delete(self, request, *args, **kwargs):
-        # Delete the User instance using the parent class method
-        response = super().delete(request, *args, **kwargs)
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        messages.success(request, 'ユーザの削除に成功。')
+        self.object.delete()
+        return HttpResponseRedirect(success_url)
 
-        messages.success(request, 'ユーザの削除に成功。')  # Display a success message
 
-        return response
-    
 
 class AllUserView(View):
     template_name = 'dashboard/user/all_user.html'

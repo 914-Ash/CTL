@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     # app names
     'dashboard',
     'api',
-    'product',
     # framework
     'idea',
     'rest_framework',

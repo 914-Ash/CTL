@@ -23,19 +23,18 @@ def auto_delete_file_on_delete(sender, instance, **kwargs):
 
 class Idea(models.Model):
     status = (
-        ('active', 'active'),
-        ('pending', 'pending')
+        ('商品化', '商品化'),
+        ('保留', '保留')
     )
 
     title = models.CharField(max_length=200, null=True)
     detail = models.TextField(max_length=2000, null=True)
     image = models.ImageField(upload_to='images/media', null=True, blank=True)
-    status = models.CharField(max_length=20, choices=status, default='pending')
+    status = models.CharField(max_length=20, choices=status, default='保留')
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     email_text = models.CharField(max_length=255, blank=True, null=True, verbose_name='Email')
-    featured = models.BooleanField(default=False)
-    visit_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    new_date_field = models.DateTimeField(null=True, blank=True)
     files = models.ManyToManyField(IdeaFile, related_name='idea_files', blank=True)
 
     class Meta:

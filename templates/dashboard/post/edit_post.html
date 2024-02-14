@@ -42,11 +42,11 @@
                     {% csrf_token %}
                     <div class="form-group">
                         <label for="title">タイトルの更新</label>
-                        <input type="text" id="title" class="form-control" placeholder="Edit Blog Title" name="title" value="{{ obj.title }}" required>
+                        <input type="text" id="title" class="form-control" placeholder="タイトルの更新" name="title" value="{{ obj.title }}" required>
                     </div>
                     <div class="form-group">
                         <label for="detail">詳細の更新</label>
-                        <textarea class="form-control" id="detail" name="detail" rows="10" placeholder="Edit Blog Details" required>{{ obj.detail }}</textarea>
+                        <textarea class="form-control" id="detail" name="detail" rows="10" placeholder="詳細の更新" required>{{ obj.detail }}</textarea>
                     </div>
                     <hr>
                     <div class="form-group">

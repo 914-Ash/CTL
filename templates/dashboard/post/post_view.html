@@ -53,11 +53,13 @@ h3 {
                     <div class="col-10 mx-auto">
                         <h5>{{ post.title }}</h5>
                         <div class="text_div">
-                            <p>Date: {{ post.created_at|date:"Y-m-d" }}</p>
-                            {% if post.status == 'active' %}
-                                <p>Status: <span style="color: green;"> {{ post.status }}</span> </p>
+                            
+                            {% if post.status == '商品化' %}
+                            <p><td> 商品化日付 </td>: {{ post.new_date_field|date:"Y-m-d" }}</p>
+                                <p>ステータス: <span style="color: green;"> {{ post.status }}</span> </p>
                             {% else %}
-                                <p>Status: <span style="color: red; background-color: rgb(70, 123, 172); padding: 5px; border-radius: 10px; ">{{ post.status }}</span></p>
+                            <p><td> 投稿日付 </td>: {{ post.created_at|date:"Y-m-d" }}</p>
+                                <p>ステータス: <span style="color: red; background-color: rgb(70, 123, 172); padding: 5px; border-radius: 10px; ">{{ post.status }}</span></p>
                             {% endif %}
                         </div>
                         
@@ -86,14 +88,16 @@ h3 {
 
                         <hr>
                         <hr>
-                        
                         {% if user.is_authenticated %}
                             {% if user.is_staff or user.is_superuser or user.author == post.author %}
+                                {% if post.status != '商品化' %}
                                 <!-- Add Edit and Delete buttons -->
                                 <a href="{% url 'edit_post' post.id %}" class="btn btn-warning btn-sm"><i class="far fa-edit"></i> 編集</a>
                                 <a href="{% url 'delete_post' post.id %}" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#delete"><i class="far fa-trash-alt"></i> 削除 </a>
-                            {% endif %}
+                                {% endif %}
+                                {% endif %}
                         {% endif %}
+
                     </div>
                 </div>
             </div>

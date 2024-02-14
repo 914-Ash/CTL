@@ -7,6 +7,8 @@
 <!-- ここにカスタムCSSを追加 -->
 {% endblock %}
 
+{% load static %}
+
 {% block body %}
 {% load humanize %}
 <div class="container-fluid">
@@ -44,9 +46,33 @@
                                     <td><a href="{% url 'all_user' %}">{{ user.username }}</a></td>
                                     <td>{{ user.email }}</td>
                                     <td>
-                                        <a href="{% url 'delete_user' user.id %}" class="btn btn-danger btn-sm">削除</a>
+                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#DeleteModal{{ user.id }}">
+                                            削除
+                                        </button>
                                     </td>
                                 </tr>
+
+                                <!-- モーダル -->
+                                <div class="modal fade" id="DeleteModal{{ user.id }}" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <form action="{% url 'delete_user' user.id %}" method="post">
+                                                {% csrf_token %}
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="exampleModalLabel">本当にユーザーを削除しますか？</h5>
+                                                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">ユーザーを削除するには削除を押してください。</div>
+                                                <div class="modal-footer">
+                                                    <button class="btn btn-secondary" type="button" data-dismiss="modal">キャンセル</button>
+                                                    <input type="submit" class="btn btn-primary" value="削除">
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
                             {% endif %}
                         {% endfor %}
                     </tbody>
@@ -56,7 +82,23 @@
     </div>
 </div>
 
-<!-- モーダル -->
-<!-- ここにモーダルのコンテンツを追加 -->
+{% endblock %}
 
+{% block script %}
+    <!-- Bootstrap core JavaScript-->
+    <script src="{% static 'vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <!-- Core plugin JavaScript-->
+    <script src="{% static 'vendor/jquery-easing/jquery.easing.min.js' %}"></script>
+
+    <!-- Custom scripts for all pages-->
+    <script src="{% static 'js/sb-admin-2.min.js' %}"></script>
+
+    <!-- Page level plugins -->
+    <script src="{% static 'vendor/datatables/jquery.dataTables.min.js' %}"></script>
+    <script src="{% static 'vendor/datatables/dataTables.bootstrap4.min.js' %}"></script>
+
+    <!-- Page level custom scripts -->
+    <script src="{% static 'js/demo/datatables-demo.js' %}"></script>
 {% endblock %}

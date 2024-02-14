@@ -10,18 +10,16 @@ from django.db.models import Q
 class HomeView(View):
     def get(self, request, *args, **kwargs):
         # Fetch the latest posts and featured posts with status="active"
-        latest_posts = Idea.objects.filter(status='active').order_by('-created_at')[:5]
-        featured_posts = Idea.objects.filter(status='active', featured=True).order_by('-created_at')[:5]
+        latest_posts = Idea.objects.filter(status='商品化').order_by('-created_at')[:5]
 
         # Pagination for home page
-        all_posts = Idea.objects.filter(status='active').order_by('-created_at')
+        all_posts = Idea.objects.filter(status='商品化').order_by('-created_at')
         paginator = Paginator(all_posts, 10)  # Show 10 posts per page
         page_number = request.GET.get('page')
         posts = paginator.get_page(page_number)
 
         context = {
             'latest_posts': latest_posts,
-            'featured_posts': featured_posts,
             'posts': posts,
         }
         return render(request, 'home/index.html', context)
@@ -31,7 +29,7 @@ class HomeView(View):
 class SearchView(View):
     def get(self,request,*args,**kwargs):
         search = request.GET['q']
-        post = Idea.objects.filter(status='active')
+        post = Idea.objects.filter(status='商品化')
         if len(search) > 100:
             posts = post.none()
         else:
